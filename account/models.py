@@ -13,7 +13,7 @@ class Person(models.Model):
     user = models.OneToOneField(to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     gender = models.CharField(max_length=1, choices=gender_choices, blank=True, null=True)
     birth_date = models.DateField(blank=True, null=True)
-    bio = models.TextField(blank=True)
+    bio = models.TextField(blank=True, null=True)
 
     
     updated_at = models.DateTimeField(auto_now=True)
