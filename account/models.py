@@ -3,7 +3,6 @@
 from django.db import models
 from django.conf import settings
 
-
 gender_choices = (
     ('M', 'Male'),
     ('F', 'Female'),
@@ -14,8 +13,8 @@ class Person(models.Model):
     gender = models.CharField(max_length=1, choices=gender_choices, blank=True, null=True)
     birth_date = models.DateField(blank=True, null=True)
     bio = models.TextField(blank=True, null=True)
+    is_student = models.BooleanField(default=True)  # New field
 
-    
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):

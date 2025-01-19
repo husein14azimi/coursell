@@ -40,8 +40,13 @@ INSTALLED_APPS = [
 
     'rest_framework',
     'djoser',
+    'django_comments',
+    'django_comments_xtd',
+    'django.contrib.sites',  # Required by django-comments-xtd
+    
     'core',
     'account',
+    'course',
 ]
 
 MIDDLEWARE = [
@@ -122,6 +127,9 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
@@ -149,3 +157,14 @@ SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(days=3),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=30),
 }
+
+
+
+# django_comment_xtd settings:
+SITE_ID = 1
+# django-comments-xtd settings
+COMMENTS_APP = 'django_comments_xtd'
+# Optional: Customize the comment form
+COMMENTS_XTD_FORM_CLASS = 'django_comments_xtd.forms.ExtendedCommentForm'
+# Optional: Enable threading
+COMMENTS_XTD_MAX_THREAD_LEVEL = 5  # Maximum depth of comment threads
