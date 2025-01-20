@@ -1,46 +1,35 @@
 # comment/serializers.py
-
 from rest_framework import serializers
-from django_comments_xtd.models import XtdComment
+from django.contrib.contenttypes.models import ContentType
+from .models import Comment
 
 class CommentSerializer(serializers.ModelSerializer):
+    content_type = serializers.CharField(write_only=True)  # Accept content_type as a string
+    object_id = serializers.IntegerField(write_only=True)  # Accept object_id as an integer
+
     class Meta:
-        model = XtdComment
-        fields = ['id', 'comment', 'user', 'submit_date', 'parent_id']  # Use 'parent_id' instead of 'parent'
-        read_only_fields = ['id', 'submit_date', 'user']
+        model = Comment
+        fields = ['id', 'content_type', 'object_id', 'text', 'user', 'created_at', 'updated_at']
+        read_only_fields = ['user', 'created_at', 'updated_at']
 
+    def create(self, validated_data):
+        # Extract content_type and object_id
+        content_type = validated_data.pop('content_type')
+        object_id = validated_data.pop('object_id')
 
+        # Get the ContentType instance
+        try:
+            content_type = ContentType.objects.get(model=content_type)
+        except ContentType.DoesNotExist:
+            raise serializers.ValidationError("Invalid content_type")
 
+        # Automatically set the user to the currently logged-in user
+        validated_data['user'] = self.context['request'].user
 
-
-# comment/serializers.py
-
-from rest_framework import serializers
-from django_comments_xtd.api.serializers import WriteCommentSerializer
-
-class CustomWriteCommentSerializer(WriteCommentSerializer):
-    def validate_name(self, value):
-        # If the name is provided, use it
-        if value.strip():
-            return value.strip()
-        
-        # If the user is provided in the serializer.save() method, use their name
-        user = self.context.get('user')
-        if user and user.is_authenticated:
-            return user.get_full_name() or user.get_username()
-        
-        # Otherwise, raise a validation error
-        raise serializers.ValidationError("This field is required")
-
-    def validate_email(self, value):
-        # If the email is provided, use it
-        if value.strip():
-            return value.strip()
-        
-        # If the user is provided in the serializer.save() method, use their email
-        user = self.context.get('user')
-        if user and user.is_authenticated:
-            return user.email
-        
-        # Otherwise, raise a validation error
-        raise serializers.ValidationError("This field is required")
+        # Create the comment
+        comment = Comment.objects.create(
+            content_type=content_type,
+            object_id=object_id,
+            **validated_data
+        )
+        return comment

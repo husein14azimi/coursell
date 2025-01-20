@@ -1,11 +1,20 @@
 ### comment api endpoints (drf-comments python package)
 
-List Comments: `GET /api/comments/`
+List Comments: `GET /comments/`
 
-Create Comment: `POST /api/comments/`
+Create Comment: `POST /comments/`
 
-Retrieve Comment: `GET /api/comments/<id>/`
+Retrieve Comment: `GET /comments/<id>/`
 
-Update Comment: `PUT /api/comments/<id>/`
+Update Comment: `PUT /comments/<id>/`
 
-Delete Comment: `DELETE /api/comments/<id>/`
+Delete Comment: `DELETE /comments/<id>/`
+
+
+### how to create and get comments:
+
+* creation:
+    * send a post request to `comments/` url.
+    * write the json object in the request body.
+* list:
+    * send a get request to `/comments/?content_type=<model_name>&object_id=<pk>`
