@@ -13,8 +13,32 @@ from .permissions import UserIsEnrolledInTheCourse, UserIsTheInstructorOfTheCour
 
 User = get_user_model()
 
+# course/views.py
+
+from rest_framework import viewsets
+from rest_framework.permissions import IsAdminUser, AllowAny
+from .models import Category, Course
+from .serializers import CategorySerializer, CourseSerializer
+
+class CategoryViewSet(viewsets.ModelViewSet):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+    permission_classes = [IsAdminUser]  # Only admin users can perform write operations
+
+    def get_permissions(self):
+        if self.request.method in ['GET']:
+            return [AllowAny()]
+        return [IsAdminUser()]
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        courses = Course.objects.filter(category=instance).select_related('category')
+        serializer = CourseSerializer(courses, many=True)
+        return Response(serializer.data)
+
+
 class CourseViewSet(viewsets.ModelViewSet):
-    queryset = Course.objects.all()
+    queryset = Course.objects.all().select_related('category')
     serializer_class = CourseSerializer
     permission_classes = [IsAuthenticated]
 
@@ -27,7 +51,12 @@ class CourseViewSet(viewsets.ModelViewSet):
         if person.is_student:  # Only instructors can create courses
             return Response({"detail": "You are registered as a student. You do not have permission to create courses."}, status=403)
 
-        course = Course.objects.create(title=request.data['title'])
+        # course = Course.objects.create(title=request.data['title'])
+        # Use the serializer to validate the data
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        # Create the course with the serializer (the general way, best practice - includes category)
+        course = serializer.save()
         MyCourses.objects.create(person=person, course=course)  # Automatically enroll the instructor in their course
         return Response(CourseSerializer(course).data, status=201)
 

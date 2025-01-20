@@ -1,12 +1,21 @@
 from django.db import models
 from account.models import Person
 
-class Course(models.Model):
+
+class Category(models.Model):
     title = models.CharField(max_length=255)
 
     def __str__(self):
         return self.title
-    
+
+
+class Course(models.Model):
+    title = models.CharField(max_length=255)
+    category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True)
+
+    def __str__(self):
+        return self.title
+
     
 class MyCourses(models.Model):
     person = models.ForeignKey(Person, on_delete=models.CASCADE)
@@ -44,3 +53,6 @@ class LessonVideo(models.Model):
     description = models.TextField(blank=True, null=True)
 
     uploaded_at = models.DateTimeField(auto_now_add=True)
+
+
+

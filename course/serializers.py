@@ -1,12 +1,26 @@
 # account.serializers
 
 from rest_framework import serializers
-from .models import Course, MyCourses
+from .models import Course, MyCourses, Category
+
+
+class CategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Category
+        fields = ['id', 'title']
 
 class CourseSerializer(serializers.ModelSerializer):
+    category = CategorySerializer(read_only=True)
+    category_id = serializers.PrimaryKeyRelatedField(
+        queryset=Category.objects.all(), 
+        source='category', 
+        write_only=True,  # For deserialization (request)
+        allow_null=True   # category is optional
+    )
+
     class Meta:
         model = Course
-        fields = ['id', 'title']
+        fields = ['id', 'title', 'category', 'category_id',]
 
 
 class MyCoursesSerializer(serializers.ModelSerializer):
@@ -38,3 +52,12 @@ class LessonVideoSerializer(serializers.ModelSerializer):
         model = LessonVideo
         fields = ['id', 'lesson', 'title', 'video', 'description', 'uploaded_at']
         read_only_fields = ['uploaded_at']
+
+
+
+# course/serializers.py
+
+from rest_framework import serializers
+
+
+# ... (rest of your existing serializers)
