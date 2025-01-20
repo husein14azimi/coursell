@@ -10,11 +10,11 @@ class CommentViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        # Filter comments by content_type and object_id if provided
+        # Filter comments by content_type and object_pk if provided
         content_type = self.request.query_params.get('content_type')
-        object_id = self.request.query_params.get('object_id')
-        if content_type and object_id:
-            return Comment.objects.filter(content_type__model=content_type, object_id=object_id)
+        object_pk = self.request.query_params.get('object_pk')  # Renamed from object_id to object_pk
+        if content_type and object_pk:
+            return Comment.objects.filter(content_type__model=content_type, object_pk=object_pk)  # Updated to object_pk
         return Comment.objects.none()
 
     def perform_create(self, serializer):

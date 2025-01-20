@@ -5,17 +5,17 @@ from .models import Comment
 
 class CommentSerializer(serializers.ModelSerializer):
     content_type = serializers.CharField(write_only=True)  # Accept content_type as a string
-    object_id = serializers.IntegerField(write_only=True)  # Accept object_id as an integer
+    object_pk = serializers.IntegerField(write_only=True)  # Renamed from object_id to object_pk
 
     class Meta:
         model = Comment
-        fields = ['id', 'content_type', 'object_id', 'text', 'user', 'created_at', 'updated_at']
+        fields = ['id', 'content_type', 'object_pk', 'text', 'user', 'created_at', 'updated_at']
         read_only_fields = ['user', 'created_at', 'updated_at']
 
     def create(self, validated_data):
-        # Extract content_type and object_id
+        # Extract content_type and object_pk
         content_type = validated_data.pop('content_type')
-        object_id = validated_data.pop('object_id')
+        object_pk = validated_data.pop('object_pk')  # Renamed from object_id to object_pk
 
         # Get the ContentType instance
         try:
@@ -29,7 +29,7 @@ class CommentSerializer(serializers.ModelSerializer):
         # Create the comment
         comment = Comment.objects.create(
             content_type=content_type,
-            object_id=object_id,
+            object_pk=object_pk,  # Updated to object_pk
             **validated_data
         )
         return comment
