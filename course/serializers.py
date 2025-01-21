@@ -2,6 +2,7 @@
 
 from rest_framework import serializers
 from .models import Course, MyCourses, Category
+from jalali.serializers import JalaliDateTimeField
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -48,6 +49,7 @@ class LessonSerializer(serializers.ModelSerializer):
 
 from .models import LessonVideo
 class LessonVideoSerializer(serializers.ModelSerializer):
+    uploaded_at = JalaliDateTimeField()
     class Meta:
         model = LessonVideo
         fields = ['id', 'lesson', 'title', 'video', 'description', 'uploaded_at']
@@ -56,6 +58,7 @@ class LessonVideoSerializer(serializers.ModelSerializer):
 
 from .models import Transaction
 class TransactionSerializer(serializers.ModelSerializer):
+    created_at = JalaliDateTimeField()
     class Meta:
         model = Transaction
         fields = ['id', 'person', 'course', 'amount', 'created_at']
@@ -64,10 +67,17 @@ class TransactionSerializer(serializers.ModelSerializer):
 
 from .models import DiscountCode, UserDiscountCode
 class DiscountCodeSerializer(serializers.ModelSerializer):
+    valid_from = JalaliDateTimeField()
+    valid_until = JalaliDateTimeField()
+    created_at = JalaliDateTimeField()
+    updated_at = JalaliDateTimeField()
     class Meta:
         model = DiscountCode
-        fields = '__all__'
+        fields = ['id', 'code', 'discount_percentage', 'maximum_discount_amount', 'is_active', 'valid_from', 'valid_until', 'created_at', 'updated_at',]
+        read_only_fields = ['id', 'created_at', 'updated_at',]
 class UserDiscountCodeSerializer(serializers.ModelSerializer):
+    created_at = JalaliDateTimeField()
     class Meta:
         model = UserDiscountCode
-        fields = '__all__'
+        fields = ['id', 'person', 'discount_code', 'transaction', 'created_at',]
+        read_only_fields = ['id', 'person', 'discount_code', 'transaction', 'created_at',]

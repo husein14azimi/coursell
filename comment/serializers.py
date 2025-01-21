@@ -2,10 +2,14 @@
 from rest_framework import serializers
 from django.contrib.contenttypes.models import ContentType
 from .models import Comment
+from jalali.serializers import JalaliDateTimeField
+
 
 class CommentSerializer(serializers.ModelSerializer):
     content_type = serializers.CharField(write_only=True)  # Accept content_type as a string
-    object_pk = serializers.IntegerField(write_only=True)  # Renamed from object_id to object_pk
+    object_pk = serializers.IntegerField(write_only=True)
+    created_at = JalaliDateTimeField(required=False, allow_null=True)
+    updated_at = JalaliDateTimeField(required=False, allow_null=True)
 
     class Meta:
         model = Comment
