@@ -60,3 +60,14 @@ class TransactionSerializer(serializers.ModelSerializer):
         model = Transaction
         fields = ['id', 'person', 'course', 'amount', 'created_at']
         read_only_fields = ['created_at']
+
+
+from .models import DiscountCode, UserDiscountCode
+class DiscountCodeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DiscountCode
+        fields = '__all__'
+class UserDiscountCodeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserDiscountCode
+        fields = '__all__'

@@ -3,10 +3,13 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from rest_framework_nested import routers
-from .views import CourseViewSet, ChapterViewSet, LessonViewSet, LessonVideoViewSet, CategoryViewSet, TransactionViewSet
+from .views import CourseViewSet, ChapterViewSet, LessonViewSet, LessonVideoViewSet, CategoryViewSet, TransactionViewSet, DiscountCodeViewSet, UserDiscountCodeViewSet
 
 router = DefaultRouter()
 router.register(r'categories', CategoryViewSet)
+
+router.register(r'discount-codes', DiscountCodeViewSet, basename='discount-code')
+router.register(r'user-discount-codes', UserDiscountCodeViewSet, basename='user-discount-code')
 router.register(r'transactions', TransactionViewSet, basename='transaction')
 
 router.register(r'', CourseViewSet, basename='course')

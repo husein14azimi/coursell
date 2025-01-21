@@ -69,11 +69,8 @@ class CourseViewSet(viewsets.ModelViewSet):
         return Response({"detail": "This course dosn't belong to you. You do not have permission to update this course."}, status=403)
 
 
-    @action(
-            detail=True,
-            methods=['post'],
-            # permission_classes=[IsAuthenticated]
-            )
+    
+    @action(detail=True, methods=['post'])
     def enroll(self, request, pk=None):
         course = self.get_object()
         person = Person.objects.get(user=request.user)
@@ -81,18 +78,41 @@ class CourseViewSet(viewsets.ModelViewSet):
         if person.is_student:
             if MyCourses.objects.filter(person=person, course=course).exists():
                 return Response({"detail": "You are already enrolled in this course."}, status=409)
+
+            discount_code = request.data.get('discount_code')
+            price = course.price
+
+            if discount_code:
+                try:
+                    discount = DiscountCode.objects.get(code=discount_code)
+                    if discount.is_valid_in_time():
+                        price = discount.calculate_discounted_price(price)
+                except DiscountCode.DoesNotExist:
+                    return Response({"detail": "discount code not found."}, status=404)
+                
+            # in here, the bank transaction should be, i guess.
+            '''the bank api send and get'''
+            # and if the response was ok, continue. if not, return an error with a status code.
+
             transaction_serializer = TransactionSerializer(data={
                 'person': person.id,
                 'course': course.id,
-                'amount': course.price
+                'amount': price
             })
             transaction_serializer.is_valid(raise_exception=True)
-            transaction_serializer.save()
+            transaction = transaction_serializer.save()
+
+            if discount_code:
+                UserDiscountCode.objects.create(
+                    person=person,
+                    discount_code=discount,
+                    transaction=transaction
+                )
 
             MyCourses.objects.get_or_create(person=person, course=course)
             return Response({"detail": "success"}, status=201)
         return Response({"detail": "Only students can enroll in courses."}, status=403)
-    
+
 
     @action(
             detail=False,
@@ -185,3 +205,45 @@ class TransactionViewSet(viewsets.ReadOnlyModelViewSet):
         else:
             person = Person.objects.get(user=self.request.user)
             return Transaction.objects.filter(person=person)
+
+
+
+
+
+from .models import DiscountCode, UserDiscountCode
+from .serializers import DiscountCodeSerializer, UserDiscountCodeSerializer
+
+class DiscountCodeViewSet(viewsets.ModelViewSet):
+    queryset = DiscountCode.objects.all()
+    serializer_class = DiscountCodeSerializer
+    permission_classes = [IsAdminUser]
+
+    @action(detail=False, methods=['post'], permission_classes=[AllowAny])
+    def verify(self, request):
+        discount_code = request.data.get('discount_code')
+        user = request.user
+        price = int(request.data.get('price'))
+
+        if not discount_code or not price:
+            return Response({"detail": "discount_code and price are required."}, status=400)
+
+        try:
+            discount = DiscountCode.objects.get(code=discount_code)
+        except DiscountCode.DoesNotExist:
+            return Response({"detail": "Invalid discount code."}, status=422)
+
+        if not discount.is_valid_in_time():
+            return Response({"detail": "Discount code is not valid."}, status=422)
+
+        person = Person.objects.get(user=user)
+        if UserDiscountCode.objects.filter(person=person, discount_code=discount).exists():
+            return Response({"detail": "You have already used this discount code."}, status=422)
+
+        new_price = discount.calculate_discounted_price(price)
+        return Response({"new_price": new_price}, status=200)
+
+
+class UserDiscountCodeViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = UserDiscountCode.objects.all()
+    serializer_class = UserDiscountCodeSerializer
+    permission_classes = [IsAdminUser]
