@@ -57,3 +57,11 @@ class LessonVideo(models.Model):
 
 
 
+class Transaction(models.Model):
+    person = models.ForeignKey(Person, on_delete=models.CASCADE)
+    course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    amount = models.IntegerField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f'{self.person.user.email} paid {self.amount} for {self.course.title} on {self.created_at}'

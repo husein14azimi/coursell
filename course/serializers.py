@@ -52,3 +52,11 @@ class LessonVideoSerializer(serializers.ModelSerializer):
         model = LessonVideo
         fields = ['id', 'lesson', 'title', 'video', 'description', 'uploaded_at']
         read_only_fields = ['uploaded_at']
+
+
+from .models import Transaction
+class TransactionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Transaction
+        fields = ['id', 'person', 'course', 'amount', 'created_at']
+        read_only_fields = ['created_at']

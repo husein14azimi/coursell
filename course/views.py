@@ -48,7 +48,7 @@ class CourseViewSet(viewsets.ModelViewSet):
         user = request.user
         person = Person.objects.get(user=user)
 
-        if person.is_student:  # Only instructors can create courses
+        if person.is_student:
             return Response({"detail": "You are registered as a student. You do not have permission to create courses."}, status=403)
 
         serializer = self.get_serializer(data=request.data)
@@ -79,8 +79,18 @@ class CourseViewSet(viewsets.ModelViewSet):
         person = Person.objects.get(user=request.user)
 
         if person.is_student:
+            if MyCourses.objects.filter(person=person, course=course).exists():
+                return Response({"detail": "You are already enrolled in this course."}, status=409)
+            transaction_serializer = TransactionSerializer(data={
+                'person': person.id,
+                'course': course.id,
+                'amount': course.price
+            })
+            transaction_serializer.is_valid(raise_exception=True)
+            transaction_serializer.save()
+
             MyCourses.objects.get_or_create(person=person, course=course)
-            return Response({"detail": "Successfully enrolled in the course."}, status=200)
+            return Response({"detail": "success"}, status=201)
         return Response({"detail": "Only students can enroll in courses."}, status=403)
     
 
@@ -160,3 +170,18 @@ class LessonVideoViewSet(viewsets.ModelViewSet):
         lesson_id = self.kwargs.get('lesson_pk')
         lesson = Lesson.objects.get(pk=lesson_id)
         serializer.save(lesson=lesson)
+
+
+from .models import Transaction
+from .serializers import TransactionSerializer
+class TransactionViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Transaction.objects.all()
+    serializer_class = TransactionSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        if self.request.user.is_staff or self.request.user.is_superuser:
+            return Transaction.objects.all()
+        else:
+            person = Person.objects.get(user=self.request.user)
+            return Transaction.objects.filter(person=person)

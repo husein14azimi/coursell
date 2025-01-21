@@ -1,12 +1,14 @@
-# account.urls
+# course.urls
 
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from rest_framework_nested import routers
-from .views import CourseViewSet, ChapterViewSet, LessonViewSet, LessonVideoViewSet, CategoryViewSet
+from .views import CourseViewSet, ChapterViewSet, LessonViewSet, LessonVideoViewSet, CategoryViewSet, TransactionViewSet
 
 router = DefaultRouter()
 router.register(r'categories', CategoryViewSet)
+router.register(r'transactions', TransactionViewSet, basename='transaction')
+
 router.register(r'', CourseViewSet, basename='course')
 
 courses_router = routers.NestedDefaultRouter(router, r'', lookup='course')
