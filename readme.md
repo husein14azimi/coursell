@@ -17,4 +17,4 @@ Delete Comment: `DELETE /comments/<id>/`
     * send a post request to `comments/` url.
     * write the json object in the request body.
 * list:
-    * send a get request to `/comments/?content_type=<model_name>&object_id=<pk>`
+    * send a get request to `/comments/?content_type=<model_name>&object_pk=<pk>`
