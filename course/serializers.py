@@ -20,7 +20,7 @@ class CourseSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Course
-        fields = ['id', 'title', 'category', 'category_id',]
+        fields = ['id', 'title', 'price', 'category', 'category_id',]
 
 
 class MyCoursesSerializer(serializers.ModelSerializer):
@@ -52,12 +52,3 @@ class LessonVideoSerializer(serializers.ModelSerializer):
         model = LessonVideo
         fields = ['id', 'lesson', 'title', 'video', 'description', 'uploaded_at']
         read_only_fields = ['uploaded_at']
-
-
-
-# course/serializers.py
-
-from rest_framework import serializers
-
-
-# ... (rest of your existing serializers)

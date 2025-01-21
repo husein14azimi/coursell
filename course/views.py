@@ -51,11 +51,8 @@ class CourseViewSet(viewsets.ModelViewSet):
         if person.is_student:  # Only instructors can create courses
             return Response({"detail": "You are registered as a student. You do not have permission to create courses."}, status=403)
 
-        # course = Course.objects.create(title=request.data['title'])
-        # Use the serializer to validate the data
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        # Create the course with the serializer (the general way, best practice - includes category)
         course = serializer.save()
         MyCourses.objects.create(person=person, course=course)  # Automatically enroll the instructor in their course
         return Response(CourseSerializer(course).data, status=201)

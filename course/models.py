@@ -12,6 +12,7 @@ class Category(models.Model):
 class Course(models.Model):
     title = models.CharField(max_length=255)
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True)
+    price = models.IntegerField()
 
     def __str__(self):
         return self.title
